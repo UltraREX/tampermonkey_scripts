@@ -15,17 +15,20 @@
     // ======== 配置区域 ========
     const menuSelector = '#follow-app-grid-container';
     const listSelector = "div[class='h-full shrink-0 border-r will-change-[width]']";
-    const colorShow = '#28a745'; // 显示状态颜色 (绿色)
-    const colorHide = '#dc3545'; // 隐藏状态颜色 (红色)
+    const colorShow = '#4ade80'; // 显示状态颜色 (绿色)
+    const colorHide = '#f87171'; // 隐藏状态颜色 (红色)
     const articleContent = '#follow-entry-render'; // 正文区域
+    const wordsCountSelector = '.text-text-secondary.flex.items-center.gap-4'; // 字数统计
+    const readingSpeed = 300; // 阅读速度
     // =========================
 
     /**
      * 创建一个切换指定元素显示/隐藏的按钮
      * @param {string} targetSelector - 目标元素的 CSS 选择器
      * @param {string} top - 按钮距离顶部的位置（例如 "68px"）
+     * @param {string} textContent - 按钮内容
      */
-    function createButton(targetSelector, top) {
+    function createButton(targetSelector, top, textContent) {
         const btn = document.createElement('div');
         btn.style.position = 'fixed';
         btn.style.top = top;
@@ -33,10 +36,18 @@
         btn.style.width = '40px';
         btn.style.height = '40px';
         btn.style.borderRadius = '50%';
+        btn.style.color = '#333';
         btn.style.backgroundColor = colorShow;
         btn.style.cursor = 'pointer';
         btn.style.zIndex = '9999';
         btn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+
+        btn.style.display = 'flex';
+        btn.style.alignItems = 'center';
+        btn.style.justifyContent = 'center';
+        btn.style.lineHeight = '1';
+        btn.style.fontSize = '12px';
+        btn.textContent = textContent;
 
         btn.addEventListener('click', () => {
             const target = document.querySelector(targetSelector);
@@ -77,13 +88,37 @@
         return chineseChars + otherChars;
     }
 
+    function createDiv(idName, className) {
+        const div = document.createElement('div');
+        if (idName) div.id = idName;
+        if (className) div.className = className;
+
+        return div;
+    }
+
+    function createIconInfo(root, id, iconClass) {
+        const div = createDiv(id, 'flex items-center gap-1.5');
+        root.appendChild(div);
+
+        const icon = document.createElement('i');
+        icon.className = `${iconClass} text-base`;
+
+        const span = document.createElement('span');
+        span.className = 'text-xs tabular-nums';
+
+        div.appendChild(icon);
+        div.appendChild(span);
+
+        return span;
+    }
+
     function estimateReadTime(words, speed = 300) {
         // speed = 每分钟阅读字数
         const minutes = words / speed;
         if (minutes < 1) {
-            return `${Math.ceil(minutes*60)}sec`;
+            return `${Math.ceil(minutes*60)} sec`;
         } else {
-            return `${Math.ceil(minutes)}min`;
+            return `${Math.ceil(minutes)} min`;
         }
     }
 
@@ -91,21 +126,23 @@
         const count = countWords(article.innerText || '');
         console.log("正文字数统计：", count);
 
-        let toolbar = document.querySelector('.flex.items-center.gap-2.tabular-nums');
+        let toolbar = document.querySelector(wordsCountSelector);
         if (!toolbar) return;
 
-        // 页面右上角浮动提示
-        let span = document.querySelector('#wordCountSpan');
-        if (!span) {
-            span = document.createElement('span');
-            span.id = 'wordCountSpan';
-            span.style.cssText = "margin-left: 8px; color: #666;";
-            toolbar.appendChild(span);
+        // 字数统计
+        let wordsCount = document.querySelector('#wordsCount .text-xs.tabular-nums')
+        if (!wordsCount) {
+            wordsCount = createIconInfo(toolbar, 'wordsCount', 'i-mgc-docment-cute-re');
         }
+        wordsCount.textContent = `${count} 字`;
 
         // 估算阅读时长
-        let estimateTime = estimateReadTime(count);
-        span.textContent = `${count}\n${estimateTime}`;
+        let estimateTime = document.querySelector('#estimateTime .text-xs.tabular-nums')
+        if (!estimateTime) {
+            estimateTime = createIconInfo(toolbar, 'estimateTime', 'i-mgc-time-cute-re');
+        }
+        let esTime = estimateReadTime(count, readingSpeed);
+        estimateTime.textContent = esTime;
     }
 
     function observeArticle() {
@@ -149,8 +186,8 @@
         hookSPA();
 
         // Menu
-        createButton(menuSelector, '68px');
+        createButton(menuSelector, '68px', 'Nav');
         // List
-        createButton(listSelector, '120px');
+        createButton(listSelector, '120px', 'Pane');
     });
 })();
