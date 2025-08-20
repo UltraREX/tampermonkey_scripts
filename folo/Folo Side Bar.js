@@ -164,7 +164,10 @@
         const origReplace = history.replaceState;
 
         function onRouteChange() {
-            observeArticle(); // 每次路由变化重新监听正文
+            // 等到浏览器完成下一帧的渲染再执行
+            requestAnimationFrame(() => {
+                observeArticle(); // 每次路由变化重新监听正文
+            });
         }
 
         history.pushState = function(...args) {
