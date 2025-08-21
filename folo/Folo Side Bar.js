@@ -181,7 +181,7 @@
         window.addEventListener('popstate', onRouteChange);
 
         // 初始执行一次
-        onRouteChange();
+        observeArticle();
     }
 
     // 页面加载完成后创建按钮
